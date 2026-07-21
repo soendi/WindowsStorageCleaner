@@ -41,24 +41,38 @@ public class ScheduledCleanupService
         var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         foreach (var line in lines)
         {
-            if (line.Contains("Nächste Ausführungszeit:"))
+            if (line.Contains("Nächste Laufzeit:"))
                 info.NextRun = line.Split(':', 2)[1].Trim();
-            else if (line.Contains("Geplante Ausführungszeit:"))
-                info.ScheduleTime = line.Split(':', 2)[1].Trim();
-            else if (line.Contains("Wiederholung: Jede"))
-                info.Frequency = line.Split(':', 2)[1].Trim();
-            else if (line.Contains("Geplanter Tasks:"))
-                info.CommandLine = line.Split(':', 2)[1].Trim();
             else if (line.Contains("Status:"))
                 info.Status = line.Split(':', 2)[1].Trim();
+            else if (line.Contains("Auszuführende Aufgabe:") || line.Contains("Auszuf", StringComparison.OrdinalIgnoreCase))
+            {
+                var idx = line.IndexOf(':');
+                if (idx >= 0) info.CommandLine = line.Substring(idx + 1).Trim();
+            }
+            else if (line.Contains("Zeitplantyp:"))
+                info.ScheduleType = line.Split(':', 2)[1].Trim();
+            else if (line.Contains("Tage:"))
+                info.ScheduleDays = line.Split(':', 2)[1].Trim();
+            else if (line.Contains("Monate:"))
+                info.ScheduleMonths = line.Split(':', 2)[1].Trim();
+            else if (line.Contains("Startzeit:"))
+                info.ScheduleTime = line.Split(':', 2)[1].Trim();
         }
 
         var match = Regex.Match(info.CommandLine, @"--profile (\w+)");
         if (match.Success)
             info.Profile = match.Groups[1].Value;
 
-        info.FriendlyName = $"{info.Frequency} – Profil: {ProfileDisplay(info.Profile)}";
-        return string.IsNullOrEmpty(info.Frequency) ? null : info;
+        // Build friendly name
+        var freq = info.ScheduleType;
+        if (info.ScheduleDays != "Nicht zutreffend" && !string.IsNullOrEmpty(info.ScheduleDays))
+            freq += $" ({info.ScheduleDays})";
+        if (info.ScheduleMonths != "Nicht zutreffend" && !string.IsNullOrEmpty(info.ScheduleMonths))
+            freq += $" – {info.ScheduleMonths}";
+
+        info.FriendlyName = $"{freq} – Profil: {ProfileDisplay(info.Profile)}";
+        return info;
     }
 
     public bool IsTaskEnabled()
@@ -119,7 +133,9 @@ public class ScheduledCleanupService
     {
         public string NextRun { get; set; } = "";
         public string ScheduleTime { get; set; } = "";
-        public string Frequency { get; set; } = "";
+        public string ScheduleType { get; set; } = "";
+        public string ScheduleDays { get; set; } = "";
+        public string ScheduleMonths { get; set; } = "";
         public string Profile { get; set; } = "";
         public string CommandLine { get; set; } = "";
         public string Status { get; set; } = "";

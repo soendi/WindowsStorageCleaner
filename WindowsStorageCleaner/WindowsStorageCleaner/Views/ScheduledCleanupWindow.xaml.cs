@@ -69,4 +69,14 @@ public partial class ScheduledCleanupWindow : Window
     }
 
     private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
+
+    private void OnComboBoxDropDownOpened(object sender, EventArgs e)
+    {
+        if (sender is System.Windows.Controls.ComboBox comboBox
+            && comboBox.Template.FindName("PART_Popup", comboBox) is System.Windows.Controls.Primitives.Popup popup
+            && popup.Child is System.Windows.Controls.Border border)
+        {
+            border.MinWidth = comboBox.ActualWidth;
+        }
+    }
 }
