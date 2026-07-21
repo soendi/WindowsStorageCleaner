@@ -1,0 +1,20 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+.vs/
+
+## Build outputs
+*.msi
+*.wixpdb
+*.zip
+Publish/
+
+## WiX tools
+Installer/.wix/
+
+## IDE
+.vs/
+*.csproj.user

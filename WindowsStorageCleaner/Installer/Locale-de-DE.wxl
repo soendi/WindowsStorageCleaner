@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization Culture="de-DE" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+  <!-- Welcome dialog -->
+  <String Id="WelcomeDlg_Title" Value="Willkommen bei der Installation von [ProductName]" />
+  <String Id="WelcomeDlg_Description" Value="Der Installationsassistent führt Sie durch die Installation von [ProductName]." />
+  <String Id="WelcomeDlg_WelcomeLabel" Value="Willkommen" />
+  <String Id="WelcomeDlg_WelcomeTitle" Value="Willkommen beim Setup von [ProductName]" />
+  <String Id="WelcomeDlg_Next" Value="Weiter" />
+
+  <!-- License dialog -->
+  <String Id="LicenseAgreementDlg_Title" Value="Lizenzvereinbarung" />
+  <String Id="LicenseAgreementDlg_Description" Value="Bitte lesen Sie die Lizenzvereinbarung sorgfältig durch." />
+  <String Id="LicenseAgreementDlg_Print" Value="Drucken" />
+  <String Id="LicenseAgreementDlg_Buttons" Value="Ich akzeptiere,&amp;Ich akzeptiere nicht" />
+  <String Id="LicenseAgreementDlg_AcceptRadioButton" Value="Ich stimme den Bedingungen der Lizenzvereinbarung zu" />
+  <String Id="LicenseAgreementDlg_DeclineRadioButton" Value="Ich stimme den Bedingungen der Lizenzvereinbarung nicht zu" />
+
+  <!-- Feature tree dialog -->
+  <String Id="FeatureTreeDlg_Title" Value="Installationsumfang" />
+  <String Id="FeatureTreeDlg_Description" Value="Wählen Sie die zu installierenden Komponenten aus." />
+  <String Id="FeatureTreeDlg_Bucket" Value="Funktionen" />
+  <String Id="FeatureTreeDlg_FeatureDescriptionLabel" Value="Beschreibung:" />
+  <String Id="FeatureTreeDlg_FeatureDescription" Value="[FeatureDescription]" />
+  <String Id="FeatureTreeDlg_FeatureSizeLabel" Value="Größe:" />
+  <String Id="FeatureTreeDlg_FeatureSize" Value="[FeatureSize]" />
+  <String Id="FeatureTreeDlg_FeatureParentCost" Value="[FeatureParentCost]" />
+  <String Id="FeatureTreeDlg_FeatureChildCost" Value="[FeatureChildCost]" />
+  <String Id="FeatureTreeDlg_SelectionNoFeature" Value="(Nicht verfügbar)" />
+  <String Id="FeatureTreeDlg_SelectionFolder" Value="Wählen Sie den Speicherort für diese Funktion aus." />
+  <String Id="FeatureTreeDlg_FeatureBucketLabel" Value="Verfügbare Funktionen:" />
+  <String Id="FeatureTreeDlg_Browse" Value="Durchsuchen..." />
+  <String Id="FeatureTreeDlg_DiskCost" Value="Speicherplatz" />
+  <String Id="FeatureTreeDlg_Reset" Value="Zurücksetzen" />
+  <String Id="FeatureTreeDlg_DiskCostButton" Value="Speicherplatz" />
+  <String Id="FeatureTreeDlg_Install" Value="Installieren" />
+
+  <!-- Installation folder dialog -->
+  <String Id="InstallDirDlg_Title" Value="Zielordner" />
+  <String Id="InstallDirDlg_Description" Value="Wählen Sie den Installationsordner." />
+  <String Id="InstallDirDlg_FolderLabel" Value="Zielordner:" />
+  <String Id="InstallDirDlg_FolderTitle" Value="Installationsverzeichnis" />
+
+  <!-- Verify ready dialog -->
+  <String Id="VerifyReadyDlg_Title" Value="Installation bereit" />
+  <String Id="VerifyReadyDlg_Description" Value="Der Installationsassistent ist bereit für die Installation." />
+  <String Id="VerifyReadyDlg_InstallTitle" Value="Bereit zur Installation" />
+  <String Id="VerifyReadyDlg_InstallText" Value="Klicken Sie auf 'Installieren', um die Installation zu starten." />
+  <String Id="VerifyReadyDlg_ChangeText" Value="Klicken Sie auf 'Weiter', um die Einstellungen zu ändern." />
+
+  <!-- Progress dialog -->
+  <String Id="ProgressDlg_Title" Value="Installation wird ausgeführt" />
+  <String Id="ProgressDlg_Description" Value="Die Installation wird ausgeführt." />
+  <String Id="ProgressDlg_ProgressLabel" Value="Status:" />
+  <String Id="ProgressDlg_StatusInstalling" Value="Installiere..." />
+  <String Id="ProgressDlg_StatusRemoving" Value="Entferne..." />
+  <String Id="ProgressDlg_StatusRepairing" Value="Repariere..." />
+  <String Id="ProgressDlg_StatusUpgrading" Value="Aktualisiere..." />
+  <String Id="ProgressDlg_CancelInstallMessageBoxTitle" Value="Installation abbrechen" />
+  <String Id="ProgressDlg_CancelInstallMessageBoxText" Value="Möchten Sie die Installation wirklich abbrechen?" />
+
+  <!-- Exit dialog -->
+  <String Id="ExitDlg_Title" Value="Installation abgeschlossen" />
+  <String Id="ExitDlg_Description" Value="Die Installation wurde erfolgreich abgeschlossen." />
+  <String Id="ExitDlg_FinishLabel" Value="Das Setup von [ProductName] wurde erfolgreich abgeschlossen." />
+  <String Id="ExitDlg_Finish" Value="Fertigstellen" />
+
+  <!-- Common buttons -->
+  <String Id="BrowseDlg_Title" Value="Ordner suchen" />
+  <String Id="BrowseDlg_Description" Value="Wählen Sie einen Ordner aus." />
+  <String Id="BrowseDlg_BrowseLabel" Value="Ordner:" />
+  <String Id="BrowseDlg_FolderExist" Value="Der Ordner existiert bereits." />
+
+  <String Id="DiskCostDlg_Title" Value="Speicherplatz" />
+  <String Id="DiskCostDlg_Description" Value="Überprüfen Sie den verfügbaren Speicherplatz." />
+  <String Id="DiskCostDlg_VolumeList" Value="Laufwerk" />
+  <String Id="DiskCostDlg_Available" Value="Verfügbar" />
+  <String Id="DiskCostDlg_Required" Value="Benötigt" />
+  <String Id="DiskCostDlg_DiskSpace" Value="Speicherplatz" />
+  <String Id="DiskCostDlg_Volume" Value="Laufwerk" />
+
+  <String Id="ResumeDlg_Title" Value="Installation fortsetzen" />
+  <String Id="ResumeDlg_Description" Value="Die Installation kann fortgesetzt werden." />
+
+  <!-- Global UI strings -->
+  <String Id="Installing" Value="Installiere" />
+  <String Id="Removing" Value="Entferne" />
+  <String Id="Repairing" Value="Repariere" />
+  <String Id="Upgrading" Value="Aktualisiere" />
+  <String Id="Cancel" Value="Abbrechen" />
+  <String Id="Browse" Value="Durchsuchen" />
+  <String Id="Install" Value="Installieren" />
+  <String Id="Remove" Value="Entfernen" />
+  <String Id="Repair" Value="Reparieren" />
+  <String Id="Finish" Value="Fertigstellen" />
+  <String Id="Next" Value="Weiter" />
+  <String Id="Back" Value="Zurück" />
+  <String Id="Close" Value="Schließen" />
+  <String Id="Yes" Value="Ja" />
+  <String Id="No" Value="Nein" />
+  <String Id="OK" Value="OK" />
+  <String Id="Error" Value="Fehler" />
+  <String Id="Warning" Value="Warnung" />
+  <String Id="Info" Value="Information" />
+  <String Id="Initializing" Value="Wird initialisiert..." />
+  <String Id="Confirm" Value="Bestätigen" />
+
+  <!-- ARP -->
+  <String Id="ARP_Modify" Value="Ändern" />
+  <String Id="ARP_Remove" Value="Entfernen" />
+  <String Id="ARP_Repair" Value="Reparieren" />
+  <String Id="ARP_ProductName" Value="Windows Storage Cleaner" />
+  <String Id="ARP_HelpLink" Value="Hilfe" />
+  <String Id="ARP_HelpTelephone" Value="Telefon" />
+  <String Id="ARP_HelpURL" Value="Webseite" />
+  <String Id="ARP_UpdateInfo" Value="Update-Info" />
+  <String Id="ARP_Comments" Value="Windows Storage Cleaner - Speicherplatzbereinigung" />
+
+  <!-- Maintenance type -->
+  <String Id="MaintenanceTypeDlg_Title" Value="Wartung" />
+  <String Id="MaintenanceTypeDlg_Description" Value="Wählen Sie die gewünschte Aktion aus." />
+  <String Id="MaintenanceTypeDlg_ChangeButton" Value="Ändern" />
+  <String Id="MaintenanceTypeDlg_RepairButton" Value="Reparieren" />
+  <String Id="MaintenanceTypeDlg_RemoveButton" Value="Entfernen" />
+
+  <!-- Maintenance welcome -->
+  <String Id="MaintenanceWelcomeDlg_Title" Value="Willkommen bei der Wartung" />
+  <String Id="MaintenanceWelcomeDlg_Description" Value="Wählen Sie die gewünschte Aktion aus." />
+
+  <!-- Upgrade -->
+  <String Id="UserExit" Value="Die Installation wurde abgebrochen." />
+  <String Id="FilesInUse_Title" Value="Dateien in Verwendung" />
+  <String Id="FilesInUse_Description" Value="Die folgenden Anwendungen verwenden Dateien, die aktualisiert werden müssen." />
+
+  <!-- Feature tree specific -->
+  <String Id="Feature_FeatureTitle" Value="Feature" />
+  <String Id="Feature_FeatureDescription" Value="Feature-Beschreibung" />
+  <String Id="Feature_FeatureSize" Value="Feature-Größe" />
+  <String Id="Feature_FeatureParent" Value="Feature-Übergeordnet" />
+  <String Id="Feature_FeatureChild" Value="Feature-Untergeordnet" />
+
+  <String Id="WixUI_FontStyle" Value="Stil" />
+  <String Id="WixUI_FontStyle_Description" Value="Beschreibung" />
+
+  <String Id="SelectFolder_DlgTitle" Value="Ordner auswählen" />
+  <String Id="SelectFolder_DlgDescription" Value="Wählen Sie einen Zielordner für die Installation aus." />
+</WixLocalization>
