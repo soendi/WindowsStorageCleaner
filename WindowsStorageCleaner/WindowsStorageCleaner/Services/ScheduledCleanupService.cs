@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace WindowsStorageCleaner.Services;
 
@@ -17,70 +18,113 @@ public class ScheduledCleanupService
 
     public static readonly string[] ProfileOptions =
     {
-        "auto (automatisch)", "sicher", "standard", "gründlich", "maximal", "alles"
+        "auto", "sicher", "standard", "gründlich", "maximal", "alles"
+    };
+
+    public static string ProfileDisplay(string p) => p switch
+    {
+        "auto" => "Auto (automatisch)",
+        _ => p
     };
 
     public bool IsTaskInstalled()
     {
-        try
+        return RunSchtasks($"/query /tn \"{TaskName}\" /fo LIST").exitCode == 0;
+    }
+
+    public TaskInfo? GetTaskDetails()
+    {
+        var (exitCode, output) = RunSchtasks($"/query /tn \"{TaskName}\" /fo LIST /v");
+        if (exitCode != 0) return null;
+
+        var info = new TaskInfo();
+        var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var line in lines)
         {
-            var psi = new ProcessStartInfo("schtasks", $"/query /tn \"{TaskName}\" /fo LIST")
-            {
-                UseShellExecute = false, RedirectStandardOutput = true,
-                CreateNoWindow = true
-            };
-            using var p = Process.Start(psi);
-            if (p == null) return false;
-            p.WaitForExit(5000);
-            return p.ExitCode == 0;
+            if (line.Contains("Nächste Ausführungszeit:"))
+                info.NextRun = line.Split(':', 2)[1].Trim();
+            else if (line.Contains("Geplante Ausführungszeit:"))
+                info.ScheduleTime = line.Split(':', 2)[1].Trim();
+            else if (line.Contains("Wiederholung: Jede"))
+                info.Frequency = line.Split(':', 2)[1].Trim();
+            else if (line.Contains("Geplanter Tasks:"))
+                info.CommandLine = line.Split(':', 2)[1].Trim();
+            else if (line.Contains("Status:"))
+                info.Status = line.Split(':', 2)[1].Trim();
         }
-        catch { return false; }
+
+        var match = Regex.Match(info.CommandLine, @"--profile (\w+)");
+        if (match.Success)
+            info.Profile = match.Groups[1].Value;
+
+        info.FriendlyName = $"{info.Frequency} – Profil: {ProfileDisplay(info.Profile)}";
+        return string.IsNullOrEmpty(info.Frequency) ? null : info;
+    }
+
+    public bool IsTaskEnabled()
+    {
+        var info = GetTaskDetails();
+        return info?.Status?.Equals("Bereit", StringComparison.OrdinalIgnoreCase) == true;
+    }
+
+    public void SetTaskEnabled(bool enabled)
+    {
+        RunSchtasks($"/change /tn \"{TaskName}\" /{(enabled ? "ENABLE" : "DISABLE")}");
     }
 
     public void InstallTask(int frequencyIndex, string profileName)
     {
+        RemoveTask();
         var freq = Frequencies[frequencyIndex];
-
         var sc = freq.SchtaskSc;
         var args = $"/create /tn \"{TaskName}\" /tr \"'{App.GetExePath()}' --profile {profileName}\" /sc {sc} /st 10:00 /f";
 
         if (freq.SchtaskMo != null)
-        {
-            if (sc == "WEEKLY")
-                args += $" /d MON /mo {freq.SchtaskMo}";
-            else
-                args += $" /d 1 /mo {freq.SchtaskMo}";
-        }
+            args += sc == "WEEKLY" ? $" /d MON /mo {freq.SchtaskMo}" : $" /d 1 /mo {freq.SchtaskMo}";
         else if (sc == "WEEKLY")
             args += " /d MON";
         else if (sc == "MONTHLY")
             args += " /d 1";
 
         args += " /ru SYSTEM /rl HIGHEST";
-
-        var psi = new ProcessStartInfo("schtasks", args)
-        {
-            UseShellExecute = false, RedirectStandardOutput = true,
-            RedirectStandardError = true, CreateNoWindow = true
-        };
-        using var p = Process.Start(psi);
-        if (p == null) return;
-        p.WaitForExit(10000);
+        RunSchtasks(args);
     }
 
     public void RemoveTask()
     {
+        RunSchtasks($"/delete /tn \"{TaskName}\" /f");
+    }
+
+    private static (int exitCode, string output) RunSchtasks(string arguments)
+    {
         try
         {
-            var psi = new ProcessStartInfo("schtasks", $"/delete /tn \"{TaskName}\" /f")
+            var psi = new ProcessStartInfo("schtasks", arguments)
             {
-                UseShellExecute = false, RedirectStandardOutput = true,
-                RedirectStandardError = true, CreateNoWindow = true
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
             };
             using var p = Process.Start(psi);
-            if (p == null) return;
+            if (p == null) return (-1, "");
+            var output = p.StandardOutput.ReadToEnd();
             p.WaitForExit(5000);
+            return (p.ExitCode, output);
         }
-        catch { }
+        catch { return (-1, ""); }
+    }
+
+    public class TaskInfo
+    {
+        public string NextRun { get; set; } = "";
+        public string ScheduleTime { get; set; } = "";
+        public string Frequency { get; set; } = "";
+        public string Profile { get; set; } = "";
+        public string CommandLine { get; set; } = "";
+        public string Status { get; set; } = "";
+        public string FriendlyName { get; set; } = "";
+        public bool IsEnabled => Status?.Equals("Bereit", StringComparison.OrdinalIgnoreCase) == true;
+        public string ToggleLabel => IsEnabled ? "Deaktivieren" : "Aktivieren";
     }
 }

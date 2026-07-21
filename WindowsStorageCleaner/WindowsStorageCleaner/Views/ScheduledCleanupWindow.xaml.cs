@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -9,18 +10,22 @@ public partial class ScheduledCleanupWindow : Window
 {
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
-
     private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 
     public bool IsDarkTheme { get; set; }
+
     private readonly ScheduledCleanupService _service = new();
+    private readonly ObservableCollection<ScheduledCleanupService.TaskInfo> _tasks = new();
 
     public ScheduledCleanupWindow()
     {
         InitializeComponent();
         FrequencyCombo.ItemsSource = ScheduledCleanupService.Frequencies.Select(f => f.Label);
+        FrequencyCombo.SelectedIndex = 0;
         ProfileCombo.ItemsSource = ScheduledCleanupService.ProfileOptions;
-        UpdateStatus();
+        ProfileCombo.SelectedIndex = 2;
+        ScheduleList.ItemsSource = _tasks;
+        RefreshList();
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -31,40 +36,36 @@ public partial class ScheduledCleanupWindow : Window
         DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref useDark, sizeof(int));
     }
 
-    private void UpdateStatus()
+    private void RefreshList()
     {
-        if (_service.IsTaskInstalled())
-        {
-            InstallBtn.IsEnabled = false;
-            RemoveBtn.IsEnabled = true;
-            StatusText.Text = "✔ Automatische Bereinigung ist eingerichtet.";
-        }
-        else
-        {
-            InstallBtn.IsEnabled = true;
-            RemoveBtn.IsEnabled = false;
-            StatusText.Text = "✘ Keine automatische Bereinigung eingerichtet.";
-        }
+        _tasks.Clear();
+        var info = _service.GetTaskDetails();
+        if (info != null)
+            _tasks.Add(info);
     }
 
-    private void OnInstallClick(object sender, RoutedEventArgs e)
+    private void OnAddScheduleClick(object sender, RoutedEventArgs e)
     {
         var freqIdx = FrequencyCombo.SelectedIndex;
         var profileIdx = ProfileCombo.SelectedIndex;
         if (freqIdx < 0 || profileIdx < 0) return;
 
-        var profileName = ScheduledCleanupService.ProfileOptions[profileIdx].Split(' ')[0];
-        _service.RemoveTask();
+        var profileName = ScheduledCleanupService.ProfileOptions[profileIdx];
         _service.InstallTask(freqIdx, profileName);
-        UpdateStatus();
-        StatusText.Text = "✔ Automatische Bereinigung wurde eingerichtet.";
+        RefreshList();
     }
 
-    private void OnRemoveClick(object sender, RoutedEventArgs e)
+    private void OnToggleTask(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement fe && fe.DataContext is ScheduledCleanupService.TaskInfo info)
+            _service.SetTaskEnabled(!info.IsEnabled);
+        RefreshList();
+    }
+
+    private void OnDeleteTask(object sender, RoutedEventArgs e)
     {
         _service.RemoveTask();
-        UpdateStatus();
-        StatusText.Text = "✘ Automatische Bereinigung wurde deaktiviert.";
+        RefreshList();
     }
 
     private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
