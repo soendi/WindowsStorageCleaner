@@ -1,4 +1,4 @@
 {
-  "version": "1.1.1.0",
-  "notes": "Geplante Bereinigung (Task Scheduler), Silent-Start mit --profile, dynamische Version"
+  "version": "1.1.3.0",
+  "notes": "Update mit Fortschrittsbalken, Auto-Neustart, geplante Bereinigung mit Detailansicht"
 }
