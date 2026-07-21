@@ -4,8 +4,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$csproj = "$root\WindowsStorageCleaner\WindowsStorageCleaner\WindowsStorageCleaner.csproj"
-$versionJson = "$root\WindowsStorageCleaner\WindowsStorageCleaner\version.json"
+$csproj = "$root\WindowsStorageCleaner\WindowsStorageCleaner.csproj"
+$versionJson = "$root\WindowsStorageCleaner\version.json"
 $productWxs = "$root\Installer\Product.wxs"
 
 if (-not $Version) {
