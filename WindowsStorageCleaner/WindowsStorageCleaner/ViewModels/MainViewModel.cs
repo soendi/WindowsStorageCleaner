@@ -11,19 +11,22 @@ public class MainViewModel : BaseViewModel
     private readonly ICleanupService _cleanupService;
     private readonly IAdminService _adminService;
     private readonly ISettingsService _settingsService;
+    private readonly UpdateService _updateService;
 
     public MainViewModel()
     {
         _cleanupService = new CleanupService();
         _adminService = new AdminService();
         _settingsService = new SettingsService();
+        _updateService = new UpdateService();
     }
 
-    public MainViewModel(ICleanupService cleanupService, IAdminService adminService, ISettingsService settingsService)
+    public MainViewModel(ICleanupService cleanupService, IAdminService adminService, ISettingsService settingsService, UpdateService? updateService = null)
     {
         _cleanupService = cleanupService;
         _adminService = adminService;
         _settingsService = settingsService;
+        _updateService = updateService ?? new UpdateService();
     }
 
     public async Task InitializeAsync()
@@ -35,6 +38,56 @@ public class MainViewModel : BaseViewModel
         LoadSettings();
         ApplyProfileRecommendation();
         ApplyTheme();
+        _ = CheckForUpdateSilentAsync();
+    }
+
+    public async Task CheckForUpdateSilentAsync()
+    {
+        try
+        {
+            var version = await _updateService.CheckForUpdate();
+            if (version != null)
+            {
+                var result = MessageBox.Show(
+                    $"Version {version} ist verfügbar.\n\nMöchten Sie das Update jetzt installieren?",
+                    "Update verfügbar", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                    await DownloadAndInstallUpdate(version);
+            }
+        }
+        catch { }
+    }
+
+    public async Task CheckForUpdateAsync()
+    {
+        var version = await _updateService.CheckForUpdate();
+        if (version == null)
+        {
+            MessageBox.Show("Sie haben die aktuellste Version.", "Kein Update verfügbar", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        var result = MessageBox.Show(
+            $"Version {version} ist verfügbar ( aktuell: {_updateService.CurrentVersion}).\n\nMöchten Sie das Update jetzt installieren?",
+            "Update verfügbar", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (result == MessageBoxResult.Yes)
+            await DownloadAndInstallUpdate(version);
+    }
+
+    private async Task DownloadAndInstallUpdate(Version version)
+    {
+        try
+        {
+            _updateService.DownloadProgress += p => { };
+            var ok = await _updateService.DownloadAndInstall(version);
+            if (ok)
+                Application.Current.Shutdown();
+            else
+                MessageBox.Show("Download fehlgeschlagen.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Update fehlgeschlagen: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private SystemInfo _systemInfo = new();

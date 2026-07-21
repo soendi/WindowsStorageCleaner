@@ -69,6 +69,11 @@ public partial class MainWindow : Window
         StartButton.Content = "Bereinigung starten";
     }
 
+    private async void OnUpdateCheckClick(object sender, RoutedEventArgs e)
+    {
+        await _viewModel.CheckForUpdateAsync();
+    }
+
     private void OnCancelClick(object sender, RoutedEventArgs e)
     {
         _viewModel.CancelCleanup();

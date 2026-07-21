@@ -53,8 +53,11 @@
                             ToolTip="Alle Bereinigungspunkte" Style="{DynamicResource IconButtonStyle}"
                             Click="OnCleanupInfoClick" Margin="0,0,5,0"/>
                     <Button Content="&#x2139;" Width="36" Height="36" FontSize="18"
-                            ToolTip="Ueber" Style="{DynamicResource IconButtonStyle}"
-                            Click="OnAboutClick"/>
+                            ToolTip="Über" Style="{DynamicResource IconButtonStyle}"
+                            Click="OnAboutClick" Margin="0,0,5,0"/>
+                    <Button Content="&#x21BB;" Width="36" Height="36" FontSize="18"
+                            ToolTip="Nach Updates suchen" Style="{DynamicResource IconButtonStyle}"
+                            Click="OnUpdateCheckClick"/>
                 </StackPanel>
             </Grid>
         </Border>

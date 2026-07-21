@@ -1,0 +1,67 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install WiX v4
+      run: dotnet tool install wix --global
+
+    - name: Publish app (self-contained)
+      run: |
+        dotnet publish WindowsStorageCleaner\WindowsStorageCleaner\WindowsStorageCleaner.csproj `
+          -c Release -p:PublishSingleFile=true --self-contained true `
+          -o WindowsStorageCleaner\Publish
+
+    - name: Restore WiX extension
+      run: |
+        $extDir = "WindowsStorageCleaner\Installer\.wix\extensions\WixToolset.UI.wixext\4.0.5\wixext4"
+        New-Item -ItemType Directory -Path $extDir -Force | Out-Null
+        nuget install WixToolset.UI.wixext -Version 4.0.5 -OutputDirectory tmp
+        Move-Item tmp\WixToolset.UI.wixext.4.0.5\wixext4\* $extDir\ -Force
+        Remove-Item tmp -Recurse -Force
+
+    - name: Build MSI
+      run: |
+        wix build WindowsStorageCleaner\Installer\Product.wxs `
+          -ext WindowsStorageCleaner\Installer\.wix\extensions\WixToolset.UI.wixext\4.0.5\wixext4\WixToolset.UI.wixext.dll `
+          -d RUNTIME_INCLUDED `
+          -o WindowsStorageCleaner\WindowsStorageCleaner_Setup.msi
+
+    - name: Patch MSI (German UI)
+      run: |
+        PowerShell -File WindowsStorageCleaner\Installer\PatchMsi.ps1 `
+          -MsiPath WindowsStorageCleaner\WindowsStorageCleaner_Setup.msi
+
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $env:GITHUB_OUTPUT
+
+    - name: Read release notes
+      id: notes
+      shell: pwsh
+      run: |
+        $json = Get-Content WindowsStorageCleaner\WindowsStorageCleaner\version.json -Raw | ConvertFrom-Json
+        echo "NOTES=$($json.notes)" >> $env:GITHUB_OUTPUT
+
+    - name: Create Release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create "${{ github.ref_name }}" `
+          WindowsStorageCleaner\WindowsStorageCleaner_Setup.msi `
+          --title "Windows Storage Cleaner ${{ github.ref_name }}" `
+          --notes "${{ steps.notes.outputs.NOTES }}"
