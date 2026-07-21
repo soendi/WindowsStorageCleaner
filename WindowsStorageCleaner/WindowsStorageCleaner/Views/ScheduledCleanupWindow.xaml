@@ -41,7 +41,7 @@
                                                FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Content="{Binding ToggleLabel}" Width="80" Height="26" FontSize="11"
+                                    <Button Content="{Binding ToggleLabel}" Width="100" Height="26" FontSize="11"
                                             Style="{DynamicResource ActionButtonStyle}"
                                             Click="OnToggleTask" Margin="0,0,4,0"/>
                                     <Button Content="Löschen" Width="70" Height="26" FontSize="11"

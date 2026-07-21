@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace WindowsStorageCleaner.Services;
@@ -41,23 +42,25 @@ public class ScheduledCleanupService
         var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         foreach (var line in lines)
         {
-            if (line.Contains("Nächste Laufzeit:"))
-                info.NextRun = line.Split(':', 2)[1].Trim();
-            else if (line.Contains("Status:"))
-                info.Status = line.Split(':', 2)[1].Trim();
-            else if (line.Contains("Auszuführende Aufgabe:") || line.Contains("Auszuf", StringComparison.OrdinalIgnoreCase))
-            {
-                var idx = line.IndexOf(':');
-                if (idx >= 0) info.CommandLine = line.Substring(idx + 1).Trim();
-            }
-            else if (line.Contains("Zeitplantyp:"))
-                info.ScheduleType = line.Split(':', 2)[1].Trim();
-            else if (line.Contains("Tage:"))
-                info.ScheduleDays = line.Split(':', 2)[1].Trim();
-            else if (line.Contains("Monate:"))
-                info.ScheduleMonths = line.Split(':', 2)[1].Trim();
-            else if (line.Contains("Startzeit:"))
-                info.ScheduleTime = line.Split(':', 2)[1].Trim();
+            var colonIdx = line.IndexOf(':');
+            if (colonIdx < 0) continue;
+            var key = line.Substring(0, colonIdx).Trim().ToLowerInvariant();
+            var val = line.Substring(colonIdx + 1).Trim();
+
+            if (key.Contains("nchste") && key.Contains("laufzeit"))
+                info.NextRun = val;
+            else if (key == "status")
+                info.Status = val;
+            else if (key.Contains("auszuf") && (key.Contains("aufgabe") || key.Contains("aufg")))
+                info.CommandLine = val;
+            else if (key.Contains("zeitplan") || key.Contains("zeitplantyp"))
+                info.ScheduleType = val;
+            else if (key == "tage")
+                info.ScheduleDays = val;
+            else if (key == "monate")
+                info.ScheduleMonths = val;
+            else if (key.Contains("startzeit"))
+                info.ScheduleTime = val;
         }
 
         var match = Regex.Match(info.CommandLine, @"--profile (\w+)");
@@ -118,6 +121,7 @@ public class ScheduledCleanupService
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                StandardOutputEncoding = Console.OutputEncoding,
                 CreateNoWindow = true
             };
             using var p = Process.Start(psi);
