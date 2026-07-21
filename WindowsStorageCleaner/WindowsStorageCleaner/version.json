@@ -1,4 +1,4 @@
 {
-  "version": "1.1.3.0",
-  "notes": "Update mit Fortschrittsbalken, Auto-Neustart, geplante Bereinigung mit Detailansicht"
+  "version": "1.1.4.0",
+  "notes": "Bugfix: Update-Ladebalken und Auto-Neustart funktionieren jetzt korrekt"
 }
