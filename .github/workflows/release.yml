@@ -18,7 +18,7 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Install WiX v4
-      run: dotnet tool install wix --global
+      run: dotnet tool install wix --global --version 4.0.5
 
     - name: Publish app (self-contained)
       run: |
