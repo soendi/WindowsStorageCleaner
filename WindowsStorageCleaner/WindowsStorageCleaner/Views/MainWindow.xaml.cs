@@ -74,6 +74,16 @@ public partial class MainWindow : Window
         await _viewModel.CheckForUpdateAsync();
     }
 
+    private void OnScheduledCleanupClick(object sender, RoutedEventArgs e)
+    {
+        var window = new ScheduledCleanupWindow
+        {
+            Owner = this,
+            IsDarkTheme = _viewModel.IsDarkTheme
+        };
+        window.ShowDialog();
+    }
+
     private void OnCancelClick(object sender, RoutedEventArgs e)
     {
         _viewModel.CancelCleanup();

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:conv="clr-namespace:WindowsStorageCleaner.Converters"
         Title="Windows Storage Cleaner"
-        Width="1500" Height="1300"
+        Width="1400" Height="1000"
         MinWidth="1000" MinHeight="700"
         WindowStartupLocation="CenterScreen"
         Closing="OnWindowClosing">
@@ -57,7 +57,10 @@
                             Click="OnAboutClick" Margin="0,0,5,0"/>
                     <Button Content="&#x21BB;" Width="36" Height="36" FontSize="18"
                             ToolTip="Nach Updates suchen" Style="{DynamicResource IconButtonStyle}"
-                            Click="OnUpdateCheckClick"/>
+                            Click="OnUpdateCheckClick" Margin="0,0,5,0"/>
+                    <Button Content="&#x1F4C5;" Width="36" Height="36" FontSize="16"
+                            ToolTip="Automatische Bereinigung" Style="{DynamicResource IconButtonStyle}"
+                            Click="OnScheduledCleanupClick"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -307,7 +310,7 @@
                     <TextBlock Text="{Binding StatusText}" FontSize="11"/>
                 </StatusBarItem>
                 <StatusBarItem HorizontalAlignment="Right">
-                    <TextBlock Text="v1.1.0" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock Text="{Binding AppVersion}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </StatusBarItem>
             </StatusBar>
         </Border>

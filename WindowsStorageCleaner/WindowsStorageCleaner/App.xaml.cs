@@ -1,15 +1,24 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security.Principal;
 using System.Windows;
+using WindowsStorageCleaner.ViewModels;
+using WindowsStorageCleaner.Views;
 
 namespace WindowsStorageCleaner;
 
 public partial class App : Application
 {
+    internal static string[] StartupArgs { get; private set; } = Array.Empty<string>();
+    internal static string? StartupProfile { get; private set; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
+        StartupArgs = e.Args;
+        StartupProfile = ParseProfileArg(e.Args);
+
         if (!IsRunningAsAdmin())
         {
             try
@@ -22,6 +31,8 @@ public partial class App : Application
                     Verb = "runas",
                     WorkingDirectory = Environment.CurrentDirectory
                 };
+                if (StartupArgs.Length > 0)
+                    startInfo.Arguments = string.Join(" ", StartupArgs);
                 Process.Start(startInfo);
                 Current.Shutdown();
                 return;
@@ -40,6 +51,22 @@ public partial class App : Application
         }
 
         base.OnStartup(e);
+    }
+
+    private static string? ParseProfileArg(string[] args)
+    {
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i].Equals("--profile", StringComparison.OrdinalIgnoreCase) ||
+                args[i].Equals("-p", StringComparison.OrdinalIgnoreCase))
+                return args[i + 1];
+        }
+        return null;
+    }
+
+    internal static string GetExePath()
+    {
+        return Process.GetCurrentProcess().MainModule?.FileName ?? "WindowsStorageCleaner.exe";
     }
 
     private static bool IsRunningAsAdmin()

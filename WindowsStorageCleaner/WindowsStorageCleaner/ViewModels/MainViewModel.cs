@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using WindowsStorageCleaner.Models;
 using WindowsStorageCleaner.Services;
@@ -29,6 +30,15 @@ public class MainViewModel : BaseViewModel
         _updateService = updateService ?? new UpdateService();
     }
 
+    public string AppVersion
+    {
+        get
+        {
+            var v = Assembly.GetExecutingAssembly().GetName().Version;
+            return v != null ? $"v{v.Major}.{v.Minor}.{v.Build}.{v.Revision}" : "v1.0.0.0";
+        }
+    }
+
     public async Task InitializeAsync()
     {
         SystemInfo = await _cleanupService.GetSystemInfoAsync();
@@ -39,6 +49,29 @@ public class MainViewModel : BaseViewModel
         ApplyProfileRecommendation();
         ApplyTheme();
         _ = CheckForUpdateSilentAsync();
+
+        if (App.StartupProfile != null)
+            await RunSilentWithProfile(App.StartupProfile);
+    }
+
+    private async Task RunSilentWithProfile(string profileName)
+    {
+        var profile = Profiles.FirstOrDefault(p =>
+            p.Name.StartsWith(profileName, StringComparison.OrdinalIgnoreCase));
+        if (profile == null) return;
+
+        SelectedProfileIndex = Profiles.IndexOf(profile);
+        if (!HaveCheckedItems()) return;
+
+        var irreversibleItems = GetSelectedIrreversibleItems();
+        if (irreversibleItems.Count > 0)
+        {
+            var confirmed = await RequestIrreversibleConfirmation();
+            if (!confirmed) return;
+        }
+
+        await ExecuteCleanupCoreAsync();
+        Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
     }
 
     public async Task CheckForUpdateSilentAsync()
@@ -63,7 +96,7 @@ public class MainViewModel : BaseViewModel
         var version = await _updateService.CheckForUpdate();
         if (version == null)
         {
-            MessageBox.Show("Sie haben die aktuellste Version.", "Kein Update verfügbar", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Sie haben die aktuelle Version.", "Kein Update verfügbar", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         var result = MessageBox.Show(
@@ -304,6 +337,11 @@ public class MainViewModel : BaseViewModel
             if (!confirmed) return;
         }
 
+        await ExecuteCleanupCoreAsync();
+    }
+
+    public async Task ExecuteCleanupCoreAsync()
+    {
         var beforeFree = SystemInfo.FreeSpace;
         IsRunning = true;
         IsResultVisible = false;
