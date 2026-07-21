@@ -108,36 +108,33 @@ public class MainViewModel : BaseViewModel
 
     private async Task DownloadAndInstallUpdate(Version version)
     {
-        Views.UpdateProgressWindow? progressWindow = null;
-        Application.Current.Dispatcher.Invoke(() =>
+        var progressWindow = new Views.UpdateProgressWindow
         {
-            progressWindow = new Views.UpdateProgressWindow
-            {
-                Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
-            };
-            progressWindow.Show();
-        });
+            Owner = Application.Current.MainWindow,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+        progressWindow.Show();
+
+        _updateService.DownloadProgress += p =>
+        {
+            if (progressWindow.IsLoaded)
+                progressWindow.SetProgress(p);
+        };
 
         try
         {
-            _updateService.DownloadProgress += p =>
-            {
-                if (progressWindow != null)
-                    progressWindow.SetProgress(p);
-            };
             var ok = await _updateService.DownloadAndInstall(version);
             if (ok)
                 Application.Current.Shutdown();
             else
             {
-                progressWindow?.Close();
+                progressWindow.Close();
                 MessageBox.Show("Download fehlgeschlagen.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         catch (Exception ex)
         {
-            progressWindow?.Close();
+            progressWindow.Close();
             MessageBox.Show($"Update fehlgeschlagen: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }

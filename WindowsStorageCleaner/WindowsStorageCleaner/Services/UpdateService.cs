@@ -103,7 +103,7 @@ public class UpdateService
 
         var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "WindowsStorageCleaner.exe";
         var tempBat = Path.Combine(Path.GetTempPath(), "WindowsStorageCleanerUpdate", "restart.bat");
-        var batContent = $"@echo off\r\n:wait\r\ntasklist /fi \"imagename eq msiexec.exe\" 2>nul | find /i \"msiexec.exe\" >nul\r\nif not errorlevel 1 (\r\n  timeout /t 3 /nobreak >nul\r\n  goto wait\r\n)\r\nstart \"\" \"{exePath}\"\r\ndel \"%~f0\"\r\n";
+        var batContent = $"@echo off\r\ntimeout /t 5 /nobreak >nul\r\n:wait\r\ntasklist /fi \"imagename eq msiexec.exe\" 2>nul | find /i \"msiexec.exe\" >nul\r\nif not errorlevel 1 (\r\n  timeout /t 3 /nobreak >nul\r\n  goto wait\r\n)\r\nstart \"\" \"{exePath}\"\r\ndel \"%~f0\"\r\n";
         File.WriteAllText(tempBat, batContent);
 
         var psi = new ProcessStartInfo
