@@ -26,13 +26,8 @@ jobs:
           -c Release -p:PublishSingleFile=true --self-contained true `
           -o WindowsStorageCleaner\Publish
 
-    - name: Restore WiX extension
-      run: |
-        $extDir = "WindowsStorageCleaner\Installer\.wix\extensions\WixToolset.UI.wixext\4.0.5\wixext4"
-        New-Item -ItemType Directory -Path $extDir -Force | Out-Null
-        nuget install WixToolset.UI.wixext -Version 4.0.5 -OutputDirectory tmp
-        Move-Item tmp\WixToolset.UI.wixext.4.0.5\wixext4\* $extDir\ -Force
-        Remove-Item tmp -Recurse -Force
+    - name: Copy app.ico for MSI
+      run: Copy-Item WindowsStorageCleaner\WindowsStorageCleaner\app.ico WindowsStorageCleaner\Publish\app.ico
 
     - name: Build MSI
       run: |
