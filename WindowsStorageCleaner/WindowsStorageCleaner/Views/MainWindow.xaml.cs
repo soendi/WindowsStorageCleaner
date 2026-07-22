@@ -120,6 +120,11 @@ public partial class MainWindow : Window
     {
         var entries = new List<CleanupInfoEntry>();
         CollectInfoEntries(_viewModel.CleanupItems, entries);
+        entries.Add(new CleanupInfoEntry
+        {
+            Name = "Startparameter",
+            InfoText = "--profile NAME oder -p NAME\n  Startet die Bereinigung sofort mit dem angegebenen Profil.\n  Verfügbare Profile: auto, sicher, standard, gründlich, maximal, alles\n  Beispiel: WindowsStorageCleaner.exe --profile sicher\n\n  Wird vom Task Scheduler für die automatische Bereinigung verwendet."
+        });
         var window = new CleanupInfoWindow
         {
             Owner = this,
