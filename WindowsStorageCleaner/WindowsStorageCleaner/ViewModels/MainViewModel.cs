@@ -246,6 +246,10 @@ public class MainViewModel : BaseViewModel
         get => _selectedProfileIndex;
         set
         {
+            // Save custom profile BEFORE switching away
+            if (value != _selectedProfileIndex)
+                SaveCustomProfile();
+
             if (SetProperty(ref _selectedProfileIndex, value) && value >= 0 && value < Profiles.Count)
                 ApplyProfile(Profiles[value]);
         }
