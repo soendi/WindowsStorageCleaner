@@ -1,4 +1,4 @@
 {
-  "version": "1.1.6.0",
-  "notes": "Bugfix: Auto-Neustart nach Update via cmd timeout + start"
+  "version": "1.1.7.0",
+  "notes": "Neustart per MSI CustomAction (wie KOFplanner), Schedule als JSON"
 }
