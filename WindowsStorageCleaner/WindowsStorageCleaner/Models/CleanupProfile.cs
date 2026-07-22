@@ -8,6 +8,7 @@ public class CleanupProfile
     public string Description { get; set; } = string.Empty;
     public ProfileLevel Level { get; set; }
     public List<string> EnabledItemIds { get; set; } = new();
+    public bool IsCustom { get; set; }
 }
 
 public enum ProfileLevel
@@ -17,5 +18,6 @@ public enum ProfileLevel
     Standard,
     Thorough,
     Maximum,
-    All
+    All,
+    Custom
 }

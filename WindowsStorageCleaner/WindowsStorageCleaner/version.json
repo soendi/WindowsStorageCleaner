@@ -1,4 +1,4 @@
 {
-  "version": "1.2.6.0",
-  "notes": "ShortcutWindow (Desktop-Verknüpfung mit --profile), Icons neu angeordnet, immer weiss"
+  "version": "1.2.7.0",
+  "notes": "Benutzerdefiniertes Profil mit Auto-Save der Checkboxen, --profile custom"
 }

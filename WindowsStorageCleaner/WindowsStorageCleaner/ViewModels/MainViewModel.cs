@@ -65,6 +65,11 @@ public class MainViewModel : BaseViewModel
             profile = Profiles.FirstOrDefault(p => p.Level == level)
                       ?? Profiles.FirstOrDefault(p => p.Level == ProfileLevel.Safe);
         }
+        else if (profileName.Equals("custom", StringComparison.OrdinalIgnoreCase) ||
+                 profileName.Equals("benutzerdefiniert", StringComparison.OrdinalIgnoreCase))
+        {
+            profile = Profiles.FirstOrDefault(p => p.IsCustom);
+        }
         else
         {
             profile = Profiles.FirstOrDefault(p =>
@@ -224,6 +229,13 @@ public class MainViewModel : BaseViewModel
         {
             Name = "Alles", Description = "Alle Checkboxen aktivieren",
             Level = ProfileLevel.All,
+            EnabledItemIds = new List<string>()
+        },
+        new CleanupProfile
+        {
+            Name = "Benutzerdefiniert", Description = "Nur die ausgewählten Punkte",
+            Level = ProfileLevel.Custom,
+            IsCustom = true,
             EnabledItemIds = new List<string>()
         }
     };
@@ -640,6 +652,11 @@ public class MainViewModel : BaseViewModel
             foreach (var child in item.Children)
             {
                 child.Parent = item;
+                child.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(CleanupItem.IsChecked))
+                        SaveCustomProfile();
+                };
                 if (child.HasChildren)
                 {
                     foreach (var grandchild in child.Children)
@@ -661,7 +678,19 @@ public class MainViewModel : BaseViewModel
 
     private void ApplyProfile(CleanupProfile profile)
     {
-        if (profile.Level == ProfileLevel.None)
+        if (profile.Level == ProfileLevel.Custom)
+        {
+            var saved = (_settingsService.GetValue("CustomProfileItems", "") ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+            foreach (var item in CleanupItems)
+            {
+                if (item.HasChildren)
+                    foreach (var child in item.Children)
+                        child.IsChecked = saved.Contains(child.Id);
+                else
+                    item.IsChecked = saved.Contains(item.Id);
+            }
+        }
+        else if (profile.Level == ProfileLevel.None)
         {
             foreach (var item in CleanupItems)
             {
@@ -701,6 +730,24 @@ public class MainViewModel : BaseViewModel
             }
         }
         LogEntries.Add(new LogEntry { Timestamp = DateTime.Now.ToString("HH:mm:ss"), Message = $"Profil geladen: {profile.Name}", Level = LogLevel.Info });
+    }
+
+    private void SaveCustomProfile()
+    {
+        if (_selectedProfileIndex < 0 || _selectedProfileIndex >= Profiles.Count) return;
+        if (!Profiles[_selectedProfileIndex].IsCustom) return;
+
+        var ids = new List<string>();
+        foreach (var item in CleanupItems)
+        {
+            if (item.HasChildren)
+                foreach (var child in item.Children)
+                { if (child.IsChecked) ids.Add(child.Id); }
+            else if (item.IsChecked)
+                ids.Add(item.Id);
+        }
+        _settingsService.SetValue("CustomProfileItems", string.Join(",", ids));
+        _settingsService.Save();
     }
 
     private void ApplyProfileRecommendation()

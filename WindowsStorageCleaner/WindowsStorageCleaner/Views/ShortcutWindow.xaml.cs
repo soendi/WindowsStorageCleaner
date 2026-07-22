@@ -17,6 +17,7 @@ public partial class ShortcutWindow : Window
     {
         ("Programm normal starten", ""),
         ("Auto (automatische Auswahl)", "--profile auto"),
+        ("Benutzerdefiniert", "--profile custom"),
         ("Sicher", "--profile sicher"),
         ("Standard", "--profile standard"),
         ("Gründlich", "--profile gründlich"),
