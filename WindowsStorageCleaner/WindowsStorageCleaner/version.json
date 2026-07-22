@@ -1,4 +1,4 @@
 {
-  "version": "1.2.0.0",
-  "notes": "Silent-Mode verbessert: kein Fenster, Dispatcher.Run, ShutdownMode"
+  "version": "1.2.1.0",
+  "notes": "MSI als 64-Bit (Arch x64), Silent-Mode Deadlock fix, Shutdown per InvokeShutdown"
 }
