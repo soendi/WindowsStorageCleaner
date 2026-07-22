@@ -385,17 +385,35 @@ public class CleanupService : ICleanupService
                     RedirectStandardError = true
                 };
                 using var proc = Process.Start(psi);
-                while (!proc!.StandardOutput.EndOfStream && !token.IsCancellationRequested)
+                if (proc == null)
+                {
+                    Report(progress, LogLevel.Error, "DISM konnte nicht gestartet werden");
+                    return 0;
+                }
+
+                // Read stderr in background to prevent deadlock
+                var stderrTask = Task.Run(() => proc.StandardError.ReadToEndAsync(), token);
+
+                while (!proc.StandardOutput.EndOfStream && !token.IsCancellationRequested)
                 {
                     var line = proc.StandardOutput.ReadLine();
                     if (!string.IsNullOrEmpty(line))
-                    {
                         Report(progress, LogLevel.Info, $"DISM: {line}");
-                        if (line.Contains("Progress"))
-                            Report(progress, LogLevel.Info, line);
-                    }
                 }
                 proc.WaitForExit();
+
+                if (proc.ExitCode != 0)
+                {
+                    var stderr = stderrTask.IsCompleted ? stderrTask.Result : "";
+                    var errorMsg = $"DISM-Fehler (0x{proc.ExitCode:X8})";
+                    if (stderr.Contains("0x800f0806") || stderr.Contains("ausstehen"))
+                        errorMsg += ": Es steht ein Neustart oder ein anderer DISM-Vorgang aus. Bitte starten Sie den PC neu und versuchen Sie es erneut.";
+                    else if (!string.IsNullOrEmpty(stderr))
+                        errorMsg += $": {stderr.Trim().Replace("\n", " ").Replace("\r", "")}";
+                    Report(progress, LogLevel.Error, errorMsg);
+                    return 0;
+                }
+
                 Report(progress, LogLevel.Success, $"DISM abgeschlossen: {item.Name}");
                 return 500 * 1024 * 1024L;
             }
