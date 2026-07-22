@@ -51,6 +51,18 @@ public partial class App : Application
         }
 
         base.OnStartup(e);
+
+        if (StartupProfile != null)
+        {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            var vm = new ViewModels.MainViewModel();
+            _ = vm.InitializeAsync();
+            System.Windows.Threading.Dispatcher.Run();
+        }
+        else
+        {
+            new Views.MainWindow().Show();
+        }
     }
 
     private static string? ParseProfileArg(string[] args)
