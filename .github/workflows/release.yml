@@ -38,6 +38,7 @@ jobs:
         wix build Product.wxs `
           -ext ".wix\extensions\WixToolset.UI.wixext\4.0.5\wixext4\WixToolset.UI.wixext.dll" `
           -d RUNTIME_INCLUDED `
+          -arch x64 `
           -o "..\WindowsStorageCleaner_Setup.msi"
 
     - name: Patch MSI (German UI)

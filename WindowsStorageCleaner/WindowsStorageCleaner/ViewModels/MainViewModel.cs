@@ -64,7 +64,7 @@ public class MainViewModel : BaseViewModel
         if (!HaveCheckedItems()) { Application.Current.Shutdown(); return; }
 
         await ExecuteCleanupCoreAsync();
-        Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
+        Application.Current.Dispatcher.InvokeShutdown();
     }
 
     public async Task CheckForUpdateSilentAsync()
