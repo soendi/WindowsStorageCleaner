@@ -32,6 +32,12 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
         Loaded += async (s, e) =>
         {
+            if (App.StartupProfile != null)
+            {
+                WindowState = WindowState.Minimized;
+                ShowInTaskbar = false;
+                Visibility = Visibility.Collapsed;
+            }
             await _viewModel.InitializeAsync();
             ApplyDwmTheme(_viewModel.IsDarkTheme);
         };

@@ -58,17 +58,10 @@ public class MainViewModel : BaseViewModel
     {
         var profile = Profiles.FirstOrDefault(p =>
             p.Name.StartsWith(profileName, StringComparison.OrdinalIgnoreCase));
-        if (profile == null) return;
+        if (profile == null) { Application.Current.Shutdown(); return; }
 
         SelectedProfileIndex = Profiles.IndexOf(profile);
-        if (!HaveCheckedItems()) return;
-
-        var irreversibleItems = GetSelectedIrreversibleItems();
-        if (irreversibleItems.Count > 0)
-        {
-            var confirmed = await RequestIrreversibleConfirmation();
-            if (!confirmed) return;
-        }
+        if (!HaveCheckedItems()) { Application.Current.Shutdown(); return; }
 
         await ExecuteCleanupCoreAsync();
         Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
