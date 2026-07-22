@@ -19,10 +19,17 @@ public class SettingsService : ISettingsService
 
     public T GetValue<T>(string key, T defaultValue)
     {
-        if (_settings.TryGetValue(key, out var value) && value is JsonElement je)
+        if (_settings.TryGetValue(key, out var value))
         {
-            try { return JsonSerializer.Deserialize<T>(je.GetRawText())!; }
-            catch { }
+            if (value is JsonElement je)
+            {
+                try { return JsonSerializer.Deserialize<T>(je.GetRawText())!; }
+                catch { }
+            }
+            else if (value is T v)
+            {
+                return v;
+            }
         }
         return defaultValue;
     }
