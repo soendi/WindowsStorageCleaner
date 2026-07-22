@@ -1,4 +1,4 @@
 {
-  "version": "1.2.7.1",
-  "notes": "Shortcut-Icon auf 🔗 geändert"
+  "version": "1.2.8.0",
+  "notes": "Fix: Custom-Profil speichert Checkboxen vor Profilwechsel"
 }
