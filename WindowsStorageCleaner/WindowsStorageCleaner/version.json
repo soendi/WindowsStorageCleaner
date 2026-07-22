@@ -1,4 +1,4 @@
 {
-  "version": "1.2.4.0",
-  "notes": "--profile auto verwendet RecommendedProfile, Fallback auf sicher"
+  "version": "1.2.5.0",
+  "notes": "Dynamischer (empfohlen)-Badge, Profilumbenennung"
 }
