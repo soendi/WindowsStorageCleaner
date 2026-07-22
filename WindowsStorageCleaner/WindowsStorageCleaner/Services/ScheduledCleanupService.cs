@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace WindowsStorageCleaner.Services;
 
@@ -23,71 +22,78 @@ public class ScheduledCleanupService
         "auto", "sicher", "standard", "gründlich", "maximal", "alles"
     };
 
-    public static string ProfileDisplay(string p) => p switch
-    {
-        "auto" => "Auto (automatisch)",
-        _ => p
-    };
+    public static string ProfileDisplay(string p) => p == "auto" ? "Auto (automatisch)" : p;
+
+    private static string SettingsPath =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                     "WindowsStorageCleaner", "schedule.json");
 
     public bool IsTaskInstalled()
     {
-        return RunSchtasks($"/query /tn \"{TaskName}\" /fo LIST").exitCode == 0;
+        return RunSchtasks($"/query /tn \"{TaskName}\"").exitCode == 0;
     }
 
     public TaskInfo? GetTaskDetails()
     {
-        var (exitCode, output) = RunSchtasks($"/query /tn \"{TaskName}\" /fo LIST /v");
-        if (exitCode != 0) return null;
+        if (!IsTaskInstalled()) return null;
 
-        var info = new TaskInfo();
-        var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        foreach (var line in lines)
+        var fromFile = LoadScheduleSettings();
+        if (fromFile != null) return fromFile;
+
+        // Fallback: parse CSV output to recover existing task info
+        var (_, csv) = RunSchtasks($"/query /tn \"{TaskName}\" /fo CSV /v");
+        var fallback = ParseCsvTaskInfo(csv);
+        if (fallback != null)
         {
-            var colonIdx = line.IndexOf(':');
-            if (colonIdx < 0) continue;
-            var key = line.Substring(0, colonIdx).Trim().ToLowerInvariant();
-            var val = line.Substring(colonIdx + 1).Trim();
-
-            if (key.Contains("nchste") && key.Contains("laufzeit"))
-                info.NextRun = val;
-            else if (key == "status")
-                info.Status = val;
-            else if (key.Contains("auszuf") && (key.Contains("aufgabe") || key.Contains("aufg")))
-                info.CommandLine = val;
-            else if (key.Contains("zeitplan") || key.Contains("zeitplantyp"))
-                info.ScheduleType = val;
-            else if (key == "tage")
-                info.ScheduleDays = val;
-            else if (key == "monate")
-                info.ScheduleMonths = val;
-            else if (key.Contains("startzeit"))
-                info.ScheduleTime = val;
+            SaveScheduleSettings(fallback);
+            return fallback;
         }
 
-        var match = Regex.Match(info.CommandLine, @"--profile (\w+)");
-        if (match.Success)
-            info.Profile = match.Groups[1].Value;
-
-        // Build friendly name
-        var freq = info.ScheduleType;
-        if (info.ScheduleDays != "Nicht zutreffend" && !string.IsNullOrEmpty(info.ScheduleDays))
-            freq += $" ({info.ScheduleDays})";
-        if (info.ScheduleMonths != "Nicht zutreffend" && !string.IsNullOrEmpty(info.ScheduleMonths))
-            freq += $" – {info.ScheduleMonths}";
-
-        info.FriendlyName = $"{freq} – Profil: {ProfileDisplay(info.Profile)}";
-        return info;
+        return null;
     }
 
-    public bool IsTaskEnabled()
+    private static TaskInfo? ParseCsvTaskInfo(string csv)
     {
-        var info = GetTaskDetails();
-        return info?.Status?.Equals("Bereit", StringComparison.OrdinalIgnoreCase) == true;
+        try
+        {
+            var lines = csv.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length < 2) return null;
+
+            // CSV format: "Host","Task","Status","Next Run","Schedule Type","Start Time","Days",...
+            var fields = ParseCsvLine(lines[1]);
+            if (fields.Count < 7) return null;
+
+            var status = fields[2].Trim('"');
+            var nextRun = fields[3].Trim('"');
+            var scheduleType = fields[4].Trim('"');
+            var days = fields[6].Trim('"');
+
+            var friendly = $"{scheduleType} ({days}) – Profil: unbekannt";
+            return new TaskInfo
+            {
+                NextRun = nextRun,
+                Frequency = $"{scheduleType} ({days})",
+                Profile = "unbekannt",
+                Status = status,
+                FriendlyName = friendly
+            };
+        }
+        catch { return null; }
     }
 
-    public void SetTaskEnabled(bool enabled)
+    private static List<string> ParseCsvLine(string line)
     {
-        RunSchtasks($"/change /tn \"{TaskName}\" /{(enabled ? "ENABLE" : "DISABLE")}");
+        var result = new List<string>();
+        var current = new System.Text.StringBuilder();
+        bool inQuotes = false;
+        foreach (char c in line)
+        {
+            if (c == '"') inQuotes = !inQuotes;
+            else if (c == ',' && !inQuotes) { result.Add(current.ToString()); current.Clear(); }
+            else current.Append(c);
+        }
+        result.Add(current.ToString());
+        return result;
     }
 
     public void InstallTask(int frequencyIndex, string profileName)
@@ -106,11 +112,57 @@ public class ScheduledCleanupService
 
         args += " /ru SYSTEM /rl HIGHEST";
         RunSchtasks(args);
+
+        var info = new TaskInfo
+        {
+            Frequency = freq.Label,
+            Profile = profileName,
+            Status = "Bereit",
+            NextRun = "wird vom Task Scheduler verwaltet",
+            FriendlyName = $"{freq.Label} – Profil: {ProfileDisplay(profileName)}"
+        };
+        SaveScheduleSettings(info);
     }
 
     public void RemoveTask()
     {
         RunSchtasks($"/delete /tn \"{TaskName}\" /f");
+        if (File.Exists(SettingsPath))
+            File.Delete(SettingsPath);
+    }
+
+    public void SetTaskEnabled(bool enabled)
+    {
+        RunSchtasks($"/change /tn \"{TaskName}\" /{(enabled ? "ENABLE" : "DISABLE")}");
+        var info = LoadScheduleSettings();
+        if (info != null)
+        {
+            info.Status = enabled ? "Bereit" : "Deaktiviert";
+            SaveScheduleSettings(info);
+        }
+    }
+
+    private TaskInfo? LoadScheduleSettings()
+    {
+        try
+        {
+            if (!File.Exists(SettingsPath)) return null;
+            var json = File.ReadAllText(SettingsPath);
+            return JsonSerializer.Deserialize<TaskInfo>(json);
+        }
+        catch { return null; }
+    }
+
+    private void SaveScheduleSettings(TaskInfo info)
+    {
+        try
+        {
+            var dir = Path.GetDirectoryName(SettingsPath);
+            if (dir != null) Directory.CreateDirectory(dir);
+            var json = JsonSerializer.Serialize(info, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(SettingsPath, json);
+        }
+        catch { }
     }
 
     private static (int exitCode, string output) RunSchtasks(string arguments)
@@ -120,35 +172,15 @@ public class ScheduledCleanupService
             var psi = new ProcessStartInfo("schtasks", arguments)
             {
                 UseShellExecute = false,
+                CreateNoWindow = true,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
+                RedirectStandardError = true
             };
             using var p = Process.Start(psi);
             if (p == null) return (-1, "");
-
-            // Read stderr in background to prevent deadlock
-            var stderr = Task.Run(() => p.StandardError.ReadToEndAsync());
-
-            using var mem = new MemoryStream();
-            p.StandardOutput.BaseStream.CopyTo(mem);
-            p.WaitForExit(10000);
-            var raw = mem.ToArray();
-            if (raw.Length == 0) return (-1, "");
-
-            // BOM detection
-            if (raw.Length >= 2 && raw[0] == 0xFF && raw[1] == 0xFE)
-                return (p.ExitCode, Encoding.Unicode.GetString(raw));
-            if (raw.Length >= 2 && raw[0] == 0xFE && raw[1] == 0xFF)
-                return (p.ExitCode, Encoding.BigEndianUnicode.GetString(raw));
-
-            // Try UTF-8 first; if it has invalid sequences, try Windows-1252
-            var utf8Result = Encoding.UTF8.GetString(raw);
-            if (!utf8Result.Contains('\uFFFD'))
-                return (p.ExitCode, utf8Result);
-
-            var ansiResult = Encoding.GetEncoding(1252).GetString(raw);
-            return (p.ExitCode, ansiResult);
+            var stdout = p.StandardOutput.ReadToEnd();
+            p.WaitForExit(5000);
+            return (p.ExitCode, stdout);
         }
         catch { return (-1, ""); }
     }
@@ -156,12 +188,8 @@ public class ScheduledCleanupService
     public class TaskInfo
     {
         public string NextRun { get; set; } = "";
-        public string ScheduleTime { get; set; } = "";
-        public string ScheduleType { get; set; } = "";
-        public string ScheduleDays { get; set; } = "";
-        public string ScheduleMonths { get; set; } = "";
+        public string Frequency { get; set; } = "";
         public string Profile { get; set; } = "";
-        public string CommandLine { get; set; } = "";
         public string Status { get; set; } = "";
         public string FriendlyName { get; set; } = "";
         public bool IsEnabled => Status?.Equals("Bereit", StringComparison.OrdinalIgnoreCase) == true;
