@@ -53,22 +53,25 @@
                         <TextBlock Text="Professionelle Speicherplatzbereinigung" FontSize="11" Foreground="#DDD"/>
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="&#x1F319;" Width="36" Height="36" FontSize="18"
-                            ToolTip="Design umschalten" Style="{DynamicResource IconButtonStyle}"
-                            Click="OnThemeToggleClick" Margin="0,0,5,0"/>
-                    <Button Content="?" Width="36" Height="36" FontSize="18" FontWeight="Bold"
-                            ToolTip="Alle Bereinigungspunkte" Style="{DynamicResource IconButtonStyle}"
-                            Click="OnCleanupInfoClick" Margin="0,0,5,0"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" TextElement.Foreground="White">
                     <Button Content="&#x2139;" Width="36" Height="36" FontSize="18"
                             ToolTip="Über" Style="{DynamicResource IconButtonStyle}"
                             Click="OnAboutClick" Margin="0,0,5,0"/>
+                    <Button Content="?" Width="36" Height="36" FontSize="18" FontWeight="Bold"
+                            ToolTip="Alle Bereinigungspunkte" Style="{DynamicResource IconButtonStyle}"
+                            Click="OnCleanupInfoClick" Margin="0,0,5,0"/>
+                    <Button Content="&#x1F4CB;" Width="36" Height="36" FontSize="16"
+                            ToolTip="Desktop-Verknüpfung erstellen" Style="{DynamicResource IconButtonStyle}"
+                            Click="OnShortcutClick" Margin="0,0,5,0"/>
+                    <Button Content="&#x1F4C5;" Width="36" Height="36" FontSize="16"
+                            ToolTip="Automatische Bereinigung" Style="{DynamicResource IconButtonStyle}"
+                            Click="OnScheduledCleanupClick" Margin="0,0,5,0"/>
                     <Button Content="&#x21BB;" Width="36" Height="36" FontSize="18"
                             ToolTip="Nach Updates suchen" Style="{DynamicResource IconButtonStyle}"
                             Click="OnUpdateCheckClick" Margin="0,0,5,0"/>
-                    <Button Content="&#x1F4C5;" Width="36" Height="36" FontSize="16"
-                            ToolTip="Automatische Bereinigung" Style="{DynamicResource IconButtonStyle}"
-                            Click="OnScheduledCleanupClick"/>
+                    <Button Content="&#x1F319;" Width="36" Height="36" FontSize="18"
+                            ToolTip="Design umschalten" Style="{DynamicResource IconButtonStyle}"
+                            Click="OnThemeToggleClick"/>
                 </StackPanel>
             </Grid>
         </Border>

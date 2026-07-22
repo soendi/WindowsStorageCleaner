@@ -80,6 +80,16 @@ public partial class MainWindow : Window
         await _viewModel.CheckForUpdateAsync();
     }
 
+    private void OnShortcutClick(object sender, RoutedEventArgs e)
+    {
+        var window = new ShortcutWindow
+        {
+            Owner = this,
+            IsDarkTheme = _viewModel.IsDarkTheme
+        };
+        window.ShowDialog();
+    }
+
     private void OnScheduledCleanupClick(object sender, RoutedEventArgs e)
     {
         var window = new ScheduledCleanupWindow

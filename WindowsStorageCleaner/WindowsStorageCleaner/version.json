@@ -1,4 +1,4 @@
 {
-  "version": "1.2.5.0",
-  "notes": "Dynamischer (empfohlen)-Badge, Profilumbenennung"
+  "version": "1.2.6.0",
+  "notes": "ShortcutWindow (Desktop-Verknüpfung mit --profile), Icons neu angeordnet, immer weiss"
 }
