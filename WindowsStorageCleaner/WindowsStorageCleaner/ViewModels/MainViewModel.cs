@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -58,12 +59,35 @@ public class MainViewModel : BaseViewModel
     {
         var profile = Profiles.FirstOrDefault(p =>
             p.Name.StartsWith(profileName, StringComparison.OrdinalIgnoreCase));
-        if (profile == null) { Application.Current.Shutdown(); return; }
+        if (profile == null) { Application.Current.Dispatcher.InvokeShutdown(); return; }
 
         SelectedProfileIndex = Profiles.IndexOf(profile);
-        if (!HaveCheckedItems()) { Application.Current.Shutdown(); return; }
+        if (!HaveCheckedItems()) { Application.Current.Dispatcher.InvokeShutdown(); return; }
 
         await ExecuteCleanupCoreAsync();
+
+        // Write result file
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WindowsStorageCleaner");
+        Directory.CreateDirectory(dir);
+        var freedText = LastResult != null ? CleanupItem.FormatSize(LastResult.TotalFreed) : "0 Byte";
+        File.WriteAllText(Path.Combine(dir, "last_cleanup.txt"),
+            $"Windows Storage Cleaner – Bereinigung abgeschlossen\n" +
+            $"Profil: {profile.Name}\n" +
+            $"Freigegeben: {freedText}\n" +
+            $"Datum: {DateTime.Now:dd.MM.yyyy HH:mm:ss}");
+
+        // Show notification via msg command (no WinForms dependency)
+        try
+        {
+            var msg = $"Windows Storage Cleaner: Reinigung abgeschlossen – Profil {profile.Name}, {freedText} freigegeben";
+            Process.Start(new ProcessStartInfo("msg", $"* \"{msg}\"")
+            {
+                UseShellExecute = true, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden
+            });
+        }
+        catch { }
+        await Task.Delay(2000);
+
         Application.Current.Dispatcher.InvokeShutdown();
     }
 
