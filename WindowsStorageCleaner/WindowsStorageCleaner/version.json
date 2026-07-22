@@ -1,4 +1,4 @@
 {
-  "version": "1.2.8.1",
-  "notes": "Fix: rekursiver PropertyChanged-Handler für alle Ebenen (auch Enkel)"
+  "version": "1.2.8.2",
+  "notes": "Fix: SettingsService.GetValue erkannte rohe Strings nicht (Custom-Profil speichert jetzt)"
 }
