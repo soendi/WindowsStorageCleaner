@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -122,14 +122,33 @@ public class ScheduledCleanupService
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                StandardOutputEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage),
                 CreateNoWindow = true
             };
             using var p = Process.Start(psi);
             if (p == null) return (-1, "");
-            var output = p.StandardOutput.ReadToEnd();
-            p.WaitForExit(5000);
-            return (p.ExitCode, output);
+
+            // Read stderr in background to prevent deadlock
+            var stderr = Task.Run(() => p.StandardError.ReadToEndAsync());
+
+            using var mem = new MemoryStream();
+            p.StandardOutput.BaseStream.CopyTo(mem);
+            p.WaitForExit(10000);
+            var raw = mem.ToArray();
+            if (raw.Length == 0) return (-1, "");
+
+            // BOM detection
+            if (raw.Length >= 2 && raw[0] == 0xFF && raw[1] == 0xFE)
+                return (p.ExitCode, Encoding.Unicode.GetString(raw));
+            if (raw.Length >= 2 && raw[0] == 0xFE && raw[1] == 0xFF)
+                return (p.ExitCode, Encoding.BigEndianUnicode.GetString(raw));
+
+            // Try UTF-8 first; if it has invalid sequences, try Windows-1252
+            var utf8Result = Encoding.UTF8.GetString(raw);
+            if (!utf8Result.Contains('\uFFFD'))
+                return (p.ExitCode, utf8Result);
+
+            var ansiResult = Encoding.GetEncoding(1252).GetString(raw);
+            return (p.ExitCode, ansiResult);
         }
         catch { return (-1, ""); }
     }
