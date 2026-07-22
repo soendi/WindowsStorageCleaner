@@ -101,23 +101,12 @@ public class UpdateService
             return false;
         }
 
-        var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "WindowsStorageCleaner.exe";
-
-        // Start msiexec (does not wait — app must exit so installer can replace files)
+        // Start msiexec (does not wait — app exits, MSI CustomAction restarts it)
         Process.Start(new ProcessStartInfo
         {
             FileName = "msiexec",
             Arguments = $"/i \"{installerPath}\" /qn",
             UseShellExecute = true
-        });
-
-        // Schedule restart after 15s delay via hidden cmd (survives app shutdown)
-        var restartCmd = $"/c timeout /t 15 /nobreak >nul & start \"\" \"{exePath}\"";
-        Process.Start(new ProcessStartInfo("cmd", restartCmd)
-        {
-            UseShellExecute = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
-            CreateNoWindow = true
         });
         return true;
     }

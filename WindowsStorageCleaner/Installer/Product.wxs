@@ -112,5 +112,12 @@
                           KeyPath="yes" />
                 </Component>
             </ComponentGroup>
+
+            <!-- Launch app after install (like KOFplanner's Inno Setup [Run] section) -->
+            <CustomAction Id="LaunchApp" FileRef="WindowsStorageCleanerEXE" ExeCommand=""
+                          Execute="immediate" Return="asyncNoWait" />
+            <InstallExecuteSequence>
+                <Custom Action="LaunchApp" After="InstallFinalize" Condition="NOT Installed" />
+            </InstallExecuteSequence>
         </Package>
     </Wix>
