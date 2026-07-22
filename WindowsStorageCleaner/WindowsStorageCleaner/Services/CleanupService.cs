@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Text;
 using WindowsStorageCleaner.Models;
 using Microsoft.Win32;
 
@@ -204,12 +206,14 @@ public class CleanupService : ICleanupService
         {
             try
             {
+                var enc = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
                 var psi = new ProcessStartInfo
                 {
                     FileName = "DISM",
                     Arguments = "/Online /Cleanup-Image /AnalyzeComponentStore",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
+                    StandardOutputEncoding = enc,
                     CreateNoWindow = true
                 };
                 using var proc = Process.Start(psi);
@@ -375,6 +379,7 @@ public class CleanupService : ICleanupService
 
                 Report(progress, LogLevel.Info, $"DISM: {args}");
 
+                var enc = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
                 var psi = new ProcessStartInfo
                 {
                     FileName = "DISM",
@@ -382,7 +387,9 @@ public class CleanupService : ICleanupService
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true
+                    StandardOutputEncoding = enc,
+                    RedirectStandardError = true,
+                    StandardErrorEncoding = enc
                 };
                 using var proc = Process.Start(psi);
                 if (proc == null)
