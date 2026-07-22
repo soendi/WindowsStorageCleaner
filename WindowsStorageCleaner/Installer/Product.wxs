@@ -2,10 +2,12 @@
     <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
          xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
         <Package Name="Windows Storage Cleaner"
-                 Manufacturer="Windows Storage Cleaner"
+                 Manufacturer="Lukas Sonderegger"
                   Version="1.2.1.0"
                  UpgradeCode="12345678-1234-1234-1234-123456789abc"
                  Scope="perMachine">
+            <Icon Id="AppIcon" SourceFile="..\Publish\app.ico" />
+            <Property Id="ARPPRODUCTICON" Value="AppIcon" />
 
             <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed."
                           AllowSameVersionUpgrades="yes"

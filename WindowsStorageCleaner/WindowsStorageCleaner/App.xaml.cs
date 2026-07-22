@@ -16,8 +16,10 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        StartupArgs = e.Args;
-        StartupProfile = ParseProfileArg(e.Args);
+        // Use Environment.GetCommandLineArgs for reliability (survives elevation)
+        var allArgs = Environment.GetCommandLineArgs();
+        StartupArgs = allArgs.Length > 1 ? allArgs.Skip(1).ToArray() : Array.Empty<string>();
+        StartupProfile = ParseProfileArg(StartupArgs);
 
         if (!IsRunningAsAdmin())
         {
