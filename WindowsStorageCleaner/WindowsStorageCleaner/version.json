@@ -1,4 +1,4 @@
 {
-  "version": "1.2.2.0",
-  "notes": "Icon im Installer, Manufacturer geändert, Silent-Arg via Environment.GetCommandLineArgs"
+  "version": "1.2.3.0",
+  "notes": "Silent-Mode: Ergebnis-Log + msg-Benachrichtigung nach Bereinigung"
 }
