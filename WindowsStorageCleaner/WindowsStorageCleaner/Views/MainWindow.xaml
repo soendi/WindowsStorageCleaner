@@ -60,7 +60,7 @@
                     <Button Content="?" Width="36" Height="36" FontSize="18" FontWeight="Bold"
                             ToolTip="Alle Bereinigungspunkte" Style="{DynamicResource IconButtonStyle}"
                             Click="OnCleanupInfoClick" Margin="0,0,5,0"/>
-                    <Button Content="&#x1F4CB;" Width="36" Height="36" FontSize="16"
+                    <Button Content="&#x1F517;" Width="36" Height="36" FontSize="18"
                             ToolTip="Desktop-Verknüpfung erstellen" Style="{DynamicResource IconButtonStyle}"
                             Click="OnShortcutClick" Margin="0,0,5,0"/>
                     <Button Content="&#x1F4C5;" Width="36" Height="36" FontSize="16"
