@@ -25,6 +25,8 @@
     <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="ToolTipBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ToolTipForegroundBrush" Color="#212121"/>
     <SolidColorBrush x:Key="WarningBackgroundBrush" Color="#FFF3E0"/>
     <SolidColorBrush x:Key="WarningBorderBrush" Color="#FFB74D"/>
     <SolidColorBrush x:Key="WarningForegroundBrush" Color="#E65100"/>

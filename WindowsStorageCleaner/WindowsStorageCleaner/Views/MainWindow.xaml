@@ -18,9 +18,9 @@
             <conv:BoolToIndentConverter x:Key="IndentConverter"/>
             <conv:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyConverter"/>
             <Style TargetType="ToolTip">
-                <Setter Property="Background" Value="#222222"/>
-                <Setter Property="Foreground" Value="#E0E0E0"/>
-                <Setter Property="BorderBrush" Value="#555555"/>
+                <Setter Property="Background" Value="{DynamicResource ToolTipBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Padding" Value="6,3"/>
