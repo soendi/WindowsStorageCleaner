@@ -368,9 +368,16 @@ public class MainViewModel : BaseViewModel
         LogEntries.Add(new LogEntry { Timestamp = DateTime.Now.ToString("HH:mm:ss"), Message = "Bereinigung gestartet", Level = LogLevel.Info });
 
         var result = new CleanupResult { FreeSpaceBefore = beforeFree };
-        var totalItems = CleanupItems.SelectMany(i => i.Children.Where(c => c.IsChecked)).ToList();
-        var totalCount = totalItems.Count;
-        var completedItems = 0;
+
+        // Count ALL individual items (children + leaf nodes)
+        var totalCount = 0;
+        foreach (var item in CleanupItems)
+        {
+            if (!item.IsChecked && !item.Children.Any(c => c.IsChecked)) continue;
+            var checkedChildren = item.Children.Where(c => c.IsChecked).ToList();
+            totalCount += checkedChildren.Count > 0 ? checkedChildren.Count : 1;
+        }
+        var completedSteps = 0;
 
         try
         {
@@ -379,25 +386,35 @@ public class MainViewModel : BaseViewModel
                 if (!item.IsChecked && !item.Children.Any(c => c.IsChecked)) continue;
 
                 CurrentAction = $"Bearbeite: {item.Name}";
-                StatusText = $"Bearbeite {item.Name}... ({completedItems + 1}/{totalCount})";
                 var progress = CreateProgress();
                 var freed = await _cleanupService.ExecuteItemAsync(item, progress, _cts.Token);
 
-                foreach (var child in item.Children.Where(c => c.State != CleanupState.Pending))
+                var processedChildren = item.Children.Where(c => c.State != CleanupState.Pending).ToList();
+                if (processedChildren.Count > 0)
                 {
-                    result.ItemResults.Add(new CleanupItemResult
+                    foreach (var child in processedChildren)
                     {
-                        ItemName = child.Name,
-                        ExpectedSize = child.EstimatedSize,
-                        ActualFreed = child.ActualFreed,
-                        State = child.State
-                    });
-                    completedItems++;
-                    ProgressPercent = (int)((double)completedItems / totalCount * 100);
+                        result.ItemResults.Add(new CleanupItemResult
+                        {
+                            ItemName = child.Name,
+                            ExpectedSize = child.EstimatedSize,
+                            ActualFreed = child.ActualFreed,
+                            State = child.State
+                        });
+                        completedSteps++;
+                        StatusText = $"{completedSteps}/{totalCount} erledigt: {child.Name}, freigegeben: {CleanupItem.FormatSize(result.TotalFreed)}";
+                        ProgressPercent = (int)((double)completedSteps / totalCount * 100);
+                    }
                 }
+                else
+                {
+                    completedSteps++;
+                    StatusText = $"{completedSteps}/{totalCount} erledigt: {item.Name}, freigegeben: {CleanupItem.FormatSize(result.TotalFreed)}";
+                    ProgressPercent = (int)((double)completedSteps / totalCount * 100);
+                }
+
                 result.TotalEstimated += item.GetTotalEstimatedSize();
                 result.TotalFreed += freed;
-                StatusText = $"{completedItems}/{totalCount} erledigt, freigegeben: {CleanupItem.FormatSize(result.TotalFreed)}";
             }
 
             SystemInfo = await _cleanupService.GetSystemInfoAsync();

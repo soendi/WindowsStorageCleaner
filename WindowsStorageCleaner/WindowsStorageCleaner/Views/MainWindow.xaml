@@ -17,6 +17,14 @@
             <conv:LogLevelToColorConverter x:Key="LogLevelConverter"/>
             <conv:BoolToIndentConverter x:Key="IndentConverter"/>
             <conv:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyConverter"/>
+            <Style TargetType="ToolTip">
+                <Setter Property="Background" Value="#222222"/>
+                <Setter Property="Foreground" Value="#E0E0E0"/>
+                <Setter Property="BorderBrush" Value="#555555"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Padding" Value="6,3"/>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="10">
