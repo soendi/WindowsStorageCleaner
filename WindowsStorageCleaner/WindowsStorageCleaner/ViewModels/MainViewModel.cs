@@ -193,7 +193,7 @@ public class MainViewModel : BaseViewModel
         },
         new CleanupProfile
         {
-            Name = "Sicher (empfohlen)", Description = "Nur temporäre und sichere Dateien",
+            Name = "Sicher", Description = "Nur temporäre und sichere Dateien",
             Level = ProfileLevel.Safe,
             EnabledItemIds = new List<string> { "usertemp", "wintemp", "recyclebin", "shadercache", "thumbnails", "updatecache" }
         },
@@ -705,10 +705,16 @@ public class MainViewModel : BaseViewModel
 
     private void ApplyProfileRecommendation()
     {
+        // Remove "(empfohlen)" from all profiles
+        foreach (var p in Profiles)
+            p.Name = p.Name.Replace(" (empfohlen)", "");
+
         var rec = SystemInfo.RecommendedProfile;
         var idx = Profiles.FindIndex(p => p.Level == rec);
         if (idx >= 0)
         {
+            Profiles[idx].Name += " (empfohlen)";
+            OnPropertyChanged(nameof(Profiles));
             _selectedProfileIndex = idx;
             OnPropertyChanged(nameof(SelectedProfileIndex));
             var profile = Profiles[idx];
