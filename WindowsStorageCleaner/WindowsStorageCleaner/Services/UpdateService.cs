@@ -102,22 +102,22 @@ public class UpdateService
         }
 
         var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "WindowsStorageCleaner.exe";
-        var tempBat = Path.Combine(Path.GetTempPath(), "WindowsStorageCleanerUpdate", "restart.bat");
-        var batContent = $"@echo off\r\ntimeout /t 5 /nobreak >nul\r\n:wait\r\ntasklist /fi \"imagename eq msiexec.exe\" 2>nul | find /i \"msiexec.exe\" >nul\r\nif not errorlevel 1 (\r\n  timeout /t 3 /nobreak >nul\r\n  goto wait\r\n)\r\nstart \"\" \"{exePath}\"\r\ndel \"%~f0\"\r\n";
-        File.WriteAllText(tempBat, batContent);
 
-        var psi = new ProcessStartInfo
+        // Start msiexec (does not wait — app must exit so installer can replace files)
+        Process.Start(new ProcessStartInfo
         {
             FileName = "msiexec",
             Arguments = $"/i \"{installerPath}\" /qn",
             UseShellExecute = true
-        };
-        Process.Start(psi);
-        Process.Start(new ProcessStartInfo
+        });
+
+        // Schedule restart after 15s delay via hidden cmd (survives app shutdown)
+        var restartCmd = $"/c timeout /t 15 /nobreak >nul & start \"\" \"{exePath}\"";
+        Process.Start(new ProcessStartInfo("cmd", restartCmd)
         {
-            FileName = tempBat,
             UseShellExecute = true,
-            WindowStyle = ProcessWindowStyle.Hidden
+            WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = true
         });
         return true;
     }
