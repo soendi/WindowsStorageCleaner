@@ -57,11 +57,23 @@ public class MainViewModel : BaseViewModel
 
     private async Task RunSilentWithProfile(string profileName)
     {
-        var profile = Profiles.FirstOrDefault(p =>
-            p.Name.StartsWith(profileName, StringComparison.OrdinalIgnoreCase));
-        if (profile == null) { Application.Current.Dispatcher.InvokeShutdown(); return; }
+        CleanupProfile? profile;
 
+        if (profileName.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        {
+            var level = SystemInfo.RecommendedProfile;
+            profile = Profiles.FirstOrDefault(p => p.Level == level)
+                      ?? Profiles.FirstOrDefault(p => p.Level == ProfileLevel.Safe);
+        }
+        else
+        {
+            profile = Profiles.FirstOrDefault(p =>
+                p.Name.StartsWith(profileName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (profile == null) { Application.Current.Dispatcher.InvokeShutdown(); return; }
         SelectedProfileIndex = Profiles.IndexOf(profile);
+
         if (!HaveCheckedItems()) { Application.Current.Dispatcher.InvokeShutdown(); return; }
 
         await ExecuteCleanupCoreAsync();
