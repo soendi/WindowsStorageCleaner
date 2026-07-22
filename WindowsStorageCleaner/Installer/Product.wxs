@@ -3,7 +3,7 @@
          xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
         <Package Name="Windows Storage Cleaner"
                  Manufacturer="Lukas Sonderegger"
-                  Version="1.2.8.0"
+                  Version="1.2.8.1"
                  UpgradeCode="12345678-1234-1234-1234-123456789abc"
                  Scope="perMachine">
             <Icon Id="AppIcon" SourceFile="..\Publish\app.ico" />

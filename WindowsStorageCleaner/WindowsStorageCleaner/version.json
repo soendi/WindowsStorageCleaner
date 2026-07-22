@@ -1,4 +1,4 @@
 {
-  "version": "1.2.8.0",
-  "notes": "Fix: Custom-Profil speichert Checkboxen vor Profilwechsel"
+  "version": "1.2.8.1",
+  "notes": "Fix: rekursiver PropertyChanged-Handler für alle Ebenen (auch Enkel)"
 }
