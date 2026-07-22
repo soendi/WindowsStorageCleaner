@@ -1,4 +1,4 @@
 {
-  "version": "1.2.1.0",
-  "notes": "MSI als 64-Bit (Arch x64), Silent-Mode Deadlock fix, Shutdown per InvokeShutdown"
+  "version": "1.2.2.0",
+  "notes": "Icon im Installer, Manufacturer geändert, Silent-Arg via Environment.GetCommandLineArgs"
 }
