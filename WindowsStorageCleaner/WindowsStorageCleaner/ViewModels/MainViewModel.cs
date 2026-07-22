@@ -214,7 +214,7 @@ public class MainViewModel : BaseViewModel
         },
         new CleanupProfile
         {
-            Name = "Maximaler Speichergewinn", Description = "Zusätzlich Ruhezustand und alte Installationen",
+            Name = "Maximal", Description = "Zusätzlich Ruhezustand und alte Installationen",
             Level = ProfileLevel.Maximum,
             EnabledItemIds = new List<string> { "usertemp", "wintemp", "recyclebin", "shadercache", "thumbnails", "updatecache",
                 "startcompcleanup", "resetbase", "browsercache", "errorreports", "updatelogs",
