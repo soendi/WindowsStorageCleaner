@@ -651,21 +651,25 @@ public class MainViewModel : BaseViewModel
             }
         });
 
+        Action<CleanupItem> subscribeChecked = null!;
+        subscribeChecked = (item) =>
+        {
+            item.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(CleanupItem.IsChecked))
+                    SaveCustomProfile();
+            };
+            if (item.HasChildren)
+                foreach (var c in item.Children)
+                    subscribeChecked(c);
+        };
+
         foreach (var item in CleanupItems)
         {
             foreach (var child in item.Children)
             {
                 child.Parent = item;
-                child.PropertyChanged += (_, e) =>
-                {
-                    if (e.PropertyName == nameof(CleanupItem.IsChecked))
-                        SaveCustomProfile();
-                };
-                if (child.HasChildren)
-                {
-                    foreach (var grandchild in child.Children)
-                        grandchild.Parent = child;
-                }
+                subscribeChecked(child);
             }
         }
     }
