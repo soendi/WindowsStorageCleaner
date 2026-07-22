@@ -10,8 +10,8 @@
     <LangVersion>12</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.1.5.0</Version>
-    <FileVersion>1.1.5.0</FileVersion>
+    <Version>1.1.6.0</Version>
+    <FileVersion>1.1.6.0</FileVersion>
     <Description>Windows Storage Cleaner - Professional disk cleanup utility</Description>
     <Copyright>Copyright (c) 2026</Copyright>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
