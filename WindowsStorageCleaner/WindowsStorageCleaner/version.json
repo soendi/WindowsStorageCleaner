@@ -1,4 +1,4 @@
 {
-  "version": "1.1.8.0",
-  "notes": "Progress-Zählung fix (alle Children), DISM-Encoding + ExitCode, dunkle Tooltips"
+  "version": "1.1.9.0",
+  "notes": "Silent-Mode: --profile startet unsichtbar, keine Dialoge, Auto-Close"
 }
